@@ -91,6 +91,15 @@ def show_pokemon(request, pokemon_id):
                 pokemon.previous_evolution.image.url
             )
         }
+    if pokemon.pokemon_set.all():
+        next_evolution = pokemon.pokemon_set.all()[0]
+        pokemon_render['next_evolution'] = {
+            'title_ru': next_evolution.title,
+            'pokemon_id': next_evolution.id,
+            'img_url': request.build_absolute_uri(
+                next_evolution.image.url
+            )
+        }
 
     pokemon_entities = PokemonEntity.objects.filter(
         appeared_at__lte=time,
@@ -101,7 +110,7 @@ def show_pokemon(request, pokemon_id):
     for pokemon_entity in pokemon_entities:
         add_pokemon(
             folium_map, pokemon_entity.lat,
-            pokemon_entity.lat,
+            pokemon_entity.lon,
             request.build_absolute_uri(
                 pokemon.image.url
             )
