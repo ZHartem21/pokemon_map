@@ -7,12 +7,12 @@ class Pokemon(models.Model):
     title_en = models.CharField(
         max_length=200,
         blank=True,
-        verbose_name='англназвание'
+        verbose_name='английское название'
     )
     title_jp = models.CharField(
         max_length=200,
         blank=True,
-        verbose_name='японназвание'
+        verbose_name='японское название'
     )
     description = models.TextField(blank=True, verbose_name='описание')
     previous_evolution = models.ForeignKey(
@@ -20,7 +20,8 @@ class Pokemon(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='прэволюция'
+        verbose_name='предыдущая эволюция',
+        related_name='previous_evolutions'
     )
 
     def __str__(self):
@@ -31,7 +32,8 @@ class PokemonEntity(models.Model):
     pokemon = models.ForeignKey(
         Pokemon,
         on_delete=models.CASCADE,
-        verbose_name='покемон'
+        verbose_name='покемон',
+        related_name='pokemons'
     )
     lat = models.FloatField(verbose_name='широта')
     lon = models.FloatField(verbose_name='долгота')
@@ -42,5 +44,3 @@ class PokemonEntity(models.Model):
     strength = models.IntegerField(null=True, blank=True, verbose_name='сила')
     defence = models.IntegerField(null=True, blank=True, verbose_name='броня')
     stamina = models.IntegerField(null=True, blank=True, verbose_name='выносливость')
-
-# your models here

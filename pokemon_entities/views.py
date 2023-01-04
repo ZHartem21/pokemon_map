@@ -1,6 +1,5 @@
 import folium
-from django.http import HttpResponseNotFound
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
 from .models import Pokemon, PokemonEntity
@@ -35,25 +34,27 @@ def show_all_pokemons(request):
     )
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    for pokemon in pokemons:
-        for pokemon_entity in pokemon_entities:
-            if pokemon_entity.pokemon.image:
-                image_url = request.build_absolute_uri(
-                    pokemon_entity.pokemon.image.url
-                )
-                add_pokemon(
-                    folium_map, pokemon_entity.lat,
-                    pokemon_entity.lon,
-                    image_url
-                )
+    for pokemon_entity in pokemon_entities:
+        if pokemon_entity.pokemon.image:
+            image_url = request.build_absolute_uri(
+                pokemon_entity.pokemon.image.url
+            )
+        else:
+            image_url = DEFAULT_IMAGE_URL
+        add_pokemon(
+            folium_map, pokemon_entity.lat,
+            pokemon_entity.lon,
+            image_url
+        )
 
     pokemons_on_page = []
     for pokemon in pokemons:
-        image_url = None
         if pokemon.image:
             image_url = request.build_absolute_uri(
                     pokemon.image.url
                 )
+        else:
+            image_url = DEFAULT_IMAGE_URL
         pokemons_on_page.append({
             'pokemon_id': pokemon.id,
             'img_url': image_url,
@@ -68,11 +69,9 @@ def show_all_pokemons(request):
 
 def show_pokemon(request, pokemon_id):
     time = timezone.localtime()
-    pokemon = Pokemon.objects.get(id=pokemon_id)
-    if not pokemon:
-        return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
+    pokemon = get_object_or_404(Pokemon, id=pokemon_id)
 
-    pokemon_render = {
+    pokemon_serialized = {
         'pokemon_id': pokemon.id,
         'title_ru': pokemon.title,
         'title_en': pokemon.title_en,
@@ -84,16 +83,16 @@ def show_pokemon(request, pokemon_id):
     }
 
     if pokemon.previous_evolution:
-        pokemon_render['previous_evolution'] = {
+        pokemon_serialized['previous_evolution'] = {
             'title_ru': pokemon.previous_evolution.title,
             'pokemon_id': pokemon.previous_evolution.id,
             'img_url': request.build_absolute_uri(
                 pokemon.previous_evolution.image.url
             )
         }
-    if pokemon.pokemon_set.all():
-        next_evolution = pokemon.pokemon_set.all()[0]
-        pokemon_render['next_evolution'] = {
+    if pokemon.previous_evolutions.all():
+        next_evolution = pokemon.previous_evolutions.first()
+        pokemon_serialized['next_evolution'] = {
             'title_ru': next_evolution.title,
             'pokemon_id': next_evolution.id,
             'img_url': request.build_absolute_uri(
@@ -117,5 +116,5 @@ def show_pokemon(request, pokemon_id):
         )
 
     return render(request, 'pokemon.html', context={
-        'map': folium_map._repr_html_(), 'pokemon': pokemon_render
+        'map': folium_map._repr_html_(), 'pokemon': pokemon_serialized
     })
