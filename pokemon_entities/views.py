@@ -90,8 +90,8 @@ def show_pokemon(request, pokemon_id):
                 pokemon.previous_evolution.image.url
             )
         }
-    if pokemon.previous_evolutions.all():
-        next_evolution = pokemon.previous_evolutions.first()
+    if pokemon.next_evolutions.all():
+        next_evolution = pokemon.next_evolutions.first()
         pokemon_serialized['next_evolution'] = {
             'title_ru': next_evolution.title,
             'pokemon_id': next_evolution.id,

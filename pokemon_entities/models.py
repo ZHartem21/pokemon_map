@@ -21,7 +21,7 @@ class Pokemon(models.Model):
         null=True,
         blank=True,
         verbose_name='предыдущая эволюция',
-        related_name='previous_evolutions'
+        related_name='next_evolutions'
     )
 
     def __str__(self):
@@ -33,7 +33,7 @@ class PokemonEntity(models.Model):
         Pokemon,
         on_delete=models.CASCADE,
         verbose_name='покемон',
-        related_name='pokemons'
+        related_name='pokemon_entities'
     )
     lat = models.FloatField(verbose_name='широта')
     lon = models.FloatField(verbose_name='долгота')
